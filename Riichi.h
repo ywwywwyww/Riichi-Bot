@@ -1,6 +1,7 @@
 #pragma once
 
-#include<algorithm>
+#include <algorithm>
+#include <vector>
 
 struct Tile
 {
@@ -27,12 +28,14 @@ struct Tile
 	}
 };
 
+std::vector<Tile> AllTiles={; //所有类型的牌（不包括红宝牌）
+
 int operator <(Tile a, Tile b)
 {
-	const static int priority[] = { 6,1,2,3,4,5,7,8,9,10 };
+	const static int number_priority[] = { 6,1,2,3,4,5,7,8,9,10 };
 	if (a.suit != b.suit)
 		return a.suit < b.suit;
-	return priority[a.number] < priority[b.number];
+	return number_priority[a.number] < number_priority[b.number];
 }
 
 int operator ==(Tile a, Tile b)
@@ -64,5 +67,5 @@ int Pair(Tile a1, Tile a2)
 {
 	a1.normal();
 	a2.normal();
-	return a1.check() && a1 == a2
+	return a1.check() && a1 == a2;
 }
