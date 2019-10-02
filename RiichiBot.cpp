@@ -1,36 +1,92 @@
-﻿// RiichiBot.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
-//
-//
-//#include <iostream>
-//
-//int main()
-//{
-//    std::cout << "Hello World!\n";
-//}
-//
-// 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
-// 调试程序: F5 或调试 >“开始调试”菜单
-//
-// 入门使用技巧: 
-//   1. 使用解决方案资源管理器窗口添加/管理文件
-//   2. 使用团队资源管理器窗口连接到源代码管理
-//   3. 使用输出窗口查看生成输出和其他消息
-//   4. 使用错误列表窗口查看错误
-//   5. 转到“项目”>“添加新项”以创建新的代码文件，或转到“项目”>“添加现有项”以将现有代码文件添加到项目
-//   6. 将来，若要再次打开此项目，请转到“文件”>“打开”>“项目”并选择 .sln 文件
-
 #include "Riichi.h"
-#include "Calculate.cpp"
+#include "Calculate.h"
+
+#include <algorithm>
+#include <iostream>
+
 
 int main()
 {
-	for (auto v : AllTiles)
-		printf("%d%c", v.number, v.suit);
-	printf("\n");
-	auto tiles1 = StrToTiles("1m1m1m2m3m4m5m6m7m8m9m9m9m");
-	Display(tiles1);
-	printf("%d\n", IsTenpai(tiles1));
-	auto tenpai = TenpaiCategory(tiles1);
-	Display(tenpai);
+//	//printf("%d\n", IsTatsu(Tile("2m"), Tile("2m")));
+//	for (auto v : AllTiles)
+//		printf("%d%c", v.number, v.suit);
+//	printf("\n");
+//	//auto tiles1 = StrToTiles("1m1m1m2m3m4m5m6m7m8m9m9m9m");
+//	//Display(tiles1);
+//	//printf("%d\n", IsTenpai(tiles1));
+//	//auto tenpai = TenpaiCategory(tiles1);
+//	//Display(tenpai);
+//	auto tiles2 = StrToTiles("2m3m5m6m7m8m9m");
+//	auto tenpai = TenpaiCategory(tiles2);
+//	Display(tenpai);
+//	auto tiles3 = StrToTiles("2m3m4m5m6m7m8m9m");
+//	auto s = Discard(tiles3);
+//	std::sort(s.begin(), s.end(), cmp);
+//	for(auto v:s)
+//		printf("%s %s\n",v.first.ToStr().c_str(), v.second.c_str());
+	std::vector<Tile> CurrentHand;
+	std::string op;
+	while(1)
+	{
+		std::sort(CurrentHand.begin(), CurrentHand.end());
+		printf("���ڵ����ƣ�"); 
+		Display(CurrentHand);
+		std::cin >> op;
+		if(op == "clear")
+			CurrentHand.clear();
+		else if(op == "shanten")
+			printf("%d\n",Shanten(CurrentHand));
+		else if(op == "display")
+		{
+			printf("���ڵ����ƣ�"); 
+			Display(CurrentHand);
+			DisplayDiscard(CurrentHand);
+		}
+		else if(op[0] == '-')
+		{
+			std::string str=op.substr(1);
+			std::vector<Tile> tiles1 = StrToTiles(str);
+			for(auto v:tiles1)
+			{
+				for(auto i = CurrentHand.begin(); i != CurrentHand.end(); i++) 
+					if(*i == v)
+					{
+						CurrentHand.erase(i);
+						break;
+					}
+			}
+		}
+		else if(op[0] == '+')
+		{
+			std::string str=op.substr(1);
+			std::vector<Tile> tiles1 = StrToTiles(str);
+			for(auto v:tiles1)
+			{
+				if(!v.valid())
+					continue;
+				CurrentHand.push_back(v);
+			}
+		}
+		else
+		{
+			std::string str=op;
+			std::vector<Tile> tiles1 = StrToTiles(str);
+			for(auto v:tiles1)
+			{
+				if(!v.valid())
+					continue;
+				CurrentHand.push_back(v);
+			}
+		}
+		if(op != "display")
+		{
+			printf("%d����\n",Shanten(CurrentHand)); 
+			DisplayDiscard(CurrentHand);
+		}
+		{
+			printf("���ƣ�");
+			DisplayTenpai(CurrentHand);
+		}
+	}
 	return 0;
 }

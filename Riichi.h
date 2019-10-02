@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef Riichi_h
+#define Riichi_h
 #include <algorithm>
 #include <vector>
 #include <map>
@@ -24,18 +26,26 @@ struct Tile
 		suit = str[1];
 		number = str[0] - '0';
 	}
-	int check() // 检测这张牌是否合法
+	int valid() // 检测这张牌是否合法
 	{
 		return (suit == 'z' && number >= 1 && number <= 7) || ((suit == 'm' || suit == 's' || suit == 'p') && number >= 0 && number <= 9);
 	}
-	void normal() // 将红宝牌转换为5
+	Tile normal() // 将红宝牌转换为5
 	{
 		if (number == 0)
 			number = 5;
+		return *this;
 	}
-	void Display()
+	void display()
 	{
 		printf("%d%c", number, suit);
+	}
+	std::string ToStr()
+	{
+		std::string res;
+		res += char(number + '0');
+		res += char(suit);
+		return res;
 	}
 };
 
@@ -48,8 +58,8 @@ const int DifferentTiles = 34;
 void TileInit()
 {
 	static int Initiated = 0;
-	if (Initiated == 1)
-		return;
+	//if (Initiated == 1)
+	//	return;
 	Initiated = 1;
 	for (int i = 1; i <= 9; i++)
 		AllTiles.push_back(Tile(i, 'm'));
@@ -89,7 +99,7 @@ int operator ==(Tile a, Tile b)
 
 int IsChow(Tile a1, Tile a2, Tile a3)
 {
-	if (!a1.check() || !a2.check() || !a3.check())
+	if (!a1.valid() || !a2.valid() || !a3.valid())
 		return 0;
 	a1.normal();
 	a2.normal();
@@ -104,20 +114,20 @@ int IsGroup(Tile a1, Tile a2, Tile a3) //先不考虑杠
 	a1.normal();
 	a2.normal();
 	a3.normal();
-	return a1.check() && a1 == a2 && a2 == a3;
+	return a1.valid() && a1 == a2 && a2 == a3;
 }
 
 int IsPair(Tile a1, Tile a2)
 {
 	a1.normal();
 	a2.normal();
-	return a1.check() && a1 == a2;
+	return a1.valid() && a1 == a2;
 }
 
 int IsTatsu(Tile a1, Tile a2)
 {
-	if (IsPair(a1, a2))
-		return 1;
+	//if (IsPair(a1, a2))
+	//	return 1;
 	a1.normal();
 	a2.normal();
 	Tile a[3] = { Tile(),a1,a2 };
@@ -128,14 +138,26 @@ int IsTatsu(Tile a1, Tile a2)
 std::vector<Tile> StrToTiles(std::string str)
 {
 	std::vector<Tile> res;
-	for (int i = 0; i < str.size(); i += 2)
-		res.push_back(Tile(str[i] - '0', str[i + 1]));
+//	for (int i = 0; i < (int)str.size(); i += 2)
+//		res.push_back(Tile(str[i] - '0', str[i + 1]));
+	std::vector<int> number;
+	for(auto v:str)
+		if(v>='0'&&v<='9')
+			number.push_back(v);
+		else
+		{
+			for(auto v2:number)
+				res.push_back(Tile(v2-'0', v));
+			number.clear();
+		}
 	return res;
 }
 
 void Display(std::vector<Tile> tiles)
 {
 	for (auto v : tiles)
-		v.Display();
+		v.display();
 	putchar('\n');
 }
+
+#endif
