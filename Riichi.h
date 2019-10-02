@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <vector>
+#include <map>
+#include <string>
 
 struct Tile
 {
@@ -12,7 +14,12 @@ struct Tile
 		suit = -1;
 		number = -1;
 	}
-	Tile(char* str)
+	Tile(int _number, char _suit)
+	{
+		number = _number;
+		suit = _suit;
+	}
+	Tile(const char* str)
 	{
 		suit = str[1];
 		number = str[0] - '0';
@@ -26,9 +33,44 @@ struct Tile
 		if (number == 0)
 			number = 5;
 	}
+	void Display()
+	{
+		printf("%d%c", number, suit);
+	}
 };
 
-std::vector<Tile> AllTiles={; //所有类型的牌（不包括红宝牌）
+//std::vector<Tile> AllTiles = { "1m","2m","3m","4m","5m","6m","7m","8m","9m","1p","2p","3p","4p","5p","6p","7p","8p","9p","1s","2s","3s","4s","5s","6s","7s","8s","9s","1z","2z","3z","4z","5z","6z","7z" };//所有类型的牌（不包括红宝牌）
+std::vector<Tile> AllTiles;
+std::map<Tile, int> TileToNum;
+
+const int DifferentTiles = 34;
+
+void TileInit()
+{
+	static int Initiated = 0;
+	if (Initiated == 1)
+		return;
+	Initiated = 1;
+	for (int i = 1; i <= 9; i++)
+		AllTiles.push_back(Tile(i, 'm'));
+	for (int i = 1; i <= 9; i++)
+		AllTiles.push_back(Tile(i, 'p'));
+	for (int i = 1; i <= 9; i++)
+		AllTiles.push_back(Tile(i, 's'));
+	for (int i = 1; i <= 7; i++)
+		AllTiles.push_back(Tile(i, 'z'));
+	int cnt = 0;
+	for (auto v : AllTiles)
+		TileToNum[v] = ++cnt;
+}
+
+struct TileInitiator
+{
+	TileInitiator()
+	{
+		TileInit();
+	}
+} TileInitiator;
 
 int operator <(Tile a, Tile b)
 {
@@ -40,10 +82,12 @@ int operator <(Tile a, Tile b)
 
 int operator ==(Tile a, Tile b)
 {
-	return (a.suit == b.suit && a.number == b.number) || ((a.suit == 'm' || a.suit == 's' || a.suit == 'p') && (a.number == 0 || a.number == 5) && (b.number == 0 || b.number == 5));
+	a.normal();
+	b.normal();
+	return a.suit == b.suit && a.number == b.number;
 }
 
-int Chow(Tile a1, Tile a2, Tile a3)
+int IsChow(Tile a1, Tile a2, Tile a3)
 {
 	if (!a1.check() || !a2.check() || !a3.check())
 		return 0;
@@ -55,7 +99,7 @@ int Chow(Tile a1, Tile a2, Tile a3)
 	return a[1].suit != 'z' && a[1].suit == a[2].suit && a[2].suit == a[3].suit && a[1].number + 1 == a[2].number && a[2].number + 1 == a[3].number;
 }
 
-int Group(Tile a1, Tile a2, Tile a3) //先不考虑杠
+int IsGroup(Tile a1, Tile a2, Tile a3) //先不考虑杠
 {
 	a1.normal();
 	a2.normal();
@@ -63,9 +107,35 @@ int Group(Tile a1, Tile a2, Tile a3) //先不考虑杠
 	return a1.check() && a1 == a2 && a2 == a3;
 }
 
-int Pair(Tile a1, Tile a2)
+int IsPair(Tile a1, Tile a2)
 {
 	a1.normal();
 	a2.normal();
 	return a1.check() && a1 == a2;
+}
+
+int IsTatsu(Tile a1, Tile a2)
+{
+	if (IsPair(a1, a2))
+		return 1;
+	a1.normal();
+	a2.normal();
+	Tile a[3] = { Tile(),a1,a2 };
+	std::sort(a + 1, a + 3);
+	return a[1].suit != 'z' && a[1].suit == a[2].suit && (a[1].number + 1 == a[2].number || a[1].number + 2 == a[2].number);
+}
+
+std::vector<Tile> StrToTiles(std::string str)
+{
+	std::vector<Tile> res;
+	for (int i = 0; i < str.size(); i += 2)
+		res.push_back(Tile(str[i] - '0', str[i + 1]));
+	return res;
+}
+
+void Display(std::vector<Tile> tiles)
+{
+	for (auto v : tiles)
+		v.Display();
+	putchar('\n');
 }
